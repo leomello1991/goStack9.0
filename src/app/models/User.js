@@ -3,9 +3,7 @@ import bcrypt from 'bcryptjs';
 
 class User extends Model {
   static init(sequelize) {
-    // CHAMO MEU METODO SUPER
     super.init(
-      // PASSO AS COLUNAS DA MINHA TABELA SOMENTE AS QUE O USUARIO IRA INTERAGIR
       {
         name: Sequelize.STRING,
         email: Sequelize.STRING,
@@ -17,12 +15,18 @@ class User extends Model {
         sequelize,
       }
     );
+
     this.addHook('beforeSave', async (user) => {
       if (user.password) {
         user.password_hash = await bcrypt.hash(user.password, 8);
       }
     });
+
     return this;
+  }
+
+  static associate(models) {
+    this.belongsTo(models.File, { foreignKey: 'avatar_id', as: 'avatar' });
   }
 
   checkPassword(password) {
